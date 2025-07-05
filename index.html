@@ -3,66 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sementeira Verde</title> <!-- Título atualizado -->
+    <title>Sementeira Verde</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             display: flex;
-            flex-direction: column; /* Permite que os elementos se empilhem verticalmente */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             
             /* ESTILOS PARA IMAGEM DE FUNDO */
-            background-image: url('Imagens/AQNgaacjj-T5RSEj7k8WlPSKtaxA2YQIGv2Q22SCMTihX9hYkuKskIkvY9dziXs5V1Cgiik9SkwiiJLWhX87evQZPHD-B2k3pfvE84SHVBAJjvbZ1OnZQ5Db_20ua-xzU-PutenMtTOLvPnZvd50kHpFp-PkFQ.jpeg'); /* Caminho para a sua imagem de fundo */
-            background-size: cover; /* Faz a imagem cobrir todo o body */
-            background-repeat: no-repeat; /* Evita que a imagem se repita */
-            background-position: center center; /* Centraliza a imagem */
-            background-attachment: fixed; /* Fixa a imagem de fundo ao rolar */
+            background-image: url('imagens/fundo.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
             
-            color: #ffffff; /* Cor do texto para contraste com o fundo */
+            color: #ffffff; /* Cor do texto no body (usado para texto fora do container) */
         }
         .container {
-            background-color: rgba(255, 255, 255, 0.85); /* Fundo semi-transparente para o conteúdo */
+            background-color: rgba(255, 255, 255, 0.85);
             padding: 2rem;
             border-radius: 0.75rem; /* rounded-lg */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
             text-align: center;
             max-width: 90%;
             width: 500px;
-            color: #1a202c; /* Cor do texto dentro do contêiner */
+            color: #2f4f4f; /* Nova cor padrão para o texto dentro do contêiner (verde escuro) */
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         h1 {
-            color: #1a202c; /* text-gray-900 */
-            font-size: 2.25rem; /* text-4xl */
-            font-weight: 700; /* font-bold */
+            color: #006400; /* Nova cor para o título H1 (verde floresta) */
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        h2 {
+            color: #2e8b57; /* Nova cor para o título H2 (verde mar) */
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-top: 2rem;
             margin-bottom: 1rem;
         }
         p {
-            color: #4a5568; /* text-gray-700 */
-            font-size: 1.125rem; /* text-lg */
+            color: #4a5568; /* Mantido um tom de cinza para parágrafos, bom contraste */
+            font-size: 1.125rem;
             margin-bottom: 1rem;
         }
         .logo {
-            max-width: 150px; /* Tamanho máximo para o logo */
-            height: auto; /* Mantém a proporção */
-            margin-bottom: 1.5rem; /* Espaçamento abaixo do logo */
-            border-radius: 0.5rem; /* Bordas arredondadas para o logo */
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .content-section {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        }
+        .content-section p, .content-section ul, .content-section ol {
+            color: #2d3748; /* Cor do texto dentro das seções (cinza escuro) */
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .content-section ul, .content-section ol {
+            padding-left: 20px;
+        }
+        a {
+            color: #32cd32; /* Nova cor para links (verde limão) */
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #228b22; /* Nova cor para links ao passar o mouse (verde floresta escuro) */
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #cbd5e0;
+            margin: 2rem 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="imagens/logo.png" alt="Logo Sementeira Verde" class="logo"> <!-- Imagem do logo -->
-        <h1>Sementeira Verde</h1> <!-- Título atualizado -->
+        <img src="imagens/logo.png" alt="Logo Sementeira Verde" class="logo">
+        <h1>Sementeira Verde</h1>
         <p>Bem-vindo ao seu site! Aqui você encontrará informações sobre a Sementeira Verde, um espaço dedicado à natureza e ao cultivo.</p>
         <p>Explore nossos produtos e iniciativas!</p>
-        <!-- Você pode adicionar mais conteúdo aqui -->
+
+        <hr>
+
+        <h2>Nossa Missão</h2>
+        <div class="content-section">
+            <p>Na Sementeira Verde, nossa missão é conectar pessoas à natureza, promovendo o cultivo sustentável e a educação ambiental. Acreditamos que um futuro mais verde começa com pequenas sementes plantadas hoje.</p>
+            <p>Oferecemos uma variedade de sementes orgânicas, ferramentas de jardinagem ecológicas e workshops educativos para todas as idades.</p>
+        </div>
+
+        <h2>O Que Oferecemos</h2>
+        <div class="content-section">
+            <p>Confira alguns dos nossos principais produtos e serviços:</p>
+            <ul>
+                <li>Sementes Orgânicas Certificadas</li>
+                <li>Ferramentas de Jardinagem Sustentáveis</li>
+                <li>Adubos Naturais</li>
+                <li>Workshops de Horticultura Urbana</li>
+                <li>Consultoria para Jardins Residenciais</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>Entre em Contato</h2>
+        <p>Tem alguma pergunta ou quer saber mais? <a href="mailto:contato@sementeiraverde.com">Envie-nos um e-mail</a> ou <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20a%20Sementeira%20Verde.">fale conosco pelo WhatsApp</a>.</p>
+        <p>Estamos ansiosos para crescer com você!</p>
     </div>
 </body>
 </html>
+
 <p style="color: black;">
 <h1>Bitrix24 o melhor CRM para sua empresa</h1> <a href="https://b24-wkf7nw.bitrix24.com.br/~i3T9m">Visite o Alan Bortolanza 24</a>
 <h2>Gestão de CRM para sua marca ou revenda, agora com uma super promoção, seja um colaborador e tenha 50 anúncios completamente grátis! Para maiores informações</h2> <a href="https://wa.me/+5549998107919?text=SUAMENSAGEM">Fale Conosco pelo WhatsApp</a>
