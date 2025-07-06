@@ -1,1 +1,83 @@
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sementeira Verde - Nossos Assuntos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            
+            /* ESTILOS PARA IMAGEM DE FUNDO (pode ser a mesma ou diferente) */
+            background-image: url('Imagens/WhatsApp Image 2024-04-25 at 12.03.06 PM (2).jpeg'); /* Certifique-se de que este caminho está correto no seu repositório */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            
+            color: #ffffff;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Um pouco mais opaco */
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            max-width: 90%;
+            width: 700px; /* Largura um pouco maior para a página de conteúdo */
+            color: #2f4f4f;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #006400;
+            font-size: 2.5rem; /* Título maior */
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        h3 { /* Estilo para subtítulos de artigos */
+            color: #2e8b57;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            text-align: left;
+        }
+        p {
+            color: #4a5568;
+            font-size: 1.125rem;
+            line-height: 1.6; /* Espaçamento entre linhas */
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #32cd32; /* Verde limão */
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .back-link:hover {
+            background-color: #228b22; /* Verde floresta escuro */
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #cbd5e0;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
