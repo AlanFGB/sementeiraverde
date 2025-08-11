@@ -1,10 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jardim Digital</title>
+    <!-- Inclui o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclui o Leaflet CSS para o mapa -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIINf0yA+lTj0W+L8d6w6xS9dD+y1P5b+gM="
         crossorigin="" />
@@ -27,6 +30,7 @@
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 p-4 sm:p-8 antialiased">
+    <!-- O contêiner principal onde o aplicativo será renderizado -->
     <div id="app-root" class="max-w-4xl mx-auto p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
         <div class="loading-container">
             <div class="text-center">
@@ -39,20 +43,23 @@
         </div>
     </div>
 
+    <!-- Inclui o Leaflet JS para a funcionalidade do mapa -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-200lP4x4Lp8qV9zGk5L6t7n6gPz9yGvF3N5eNl+bC8E="
         crossorigin=""></script>
+    
+    <!-- Inclui os módulos do Firebase e o código principal do aplicativo -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables from the Canvas environment
+        // Variáveis globais fornecidas pelo ambiente do Canvas
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
         
-        let app, db, auth;
+        let db, auth;
         let userId = null;
         let plantsData = [];
         let mapInstance = null;
@@ -62,6 +69,7 @@
 
         const appRoot = document.getElementById('app-root');
 
+        // Renderiza toda a interface do aplicativo no elemento root
         const renderApp = () => {
             appRoot.innerHTML = `
                 <header class="text-center mb-8">
@@ -168,7 +176,7 @@
                                     ${plant.aiDetails ? `<div class="mt-2 p-2 bg-gray-700 rounded-lg"><p class="font-bold text-sm text-green-300">Detalhes Adicionais da IA:</p><p class="text-sm text-gray-400 whitespace-pre-wrap">${plant.aiDetails}</p></div>` : ''}
                                     ${plant.createdAt ? `<p class="mt-1 text-xs text-gray-500"><span class="font-bold">Salvo em:</span> ${new Date(plant.createdAt.toDate()).toLocaleString()}</p>` : ''}
                                 </div>
-                                <button onclick="handleEdit('${plant.id}')" class="mt-4 sm:mt-0 px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-150 ease-in-out">
+                                <button data-plant-id="${plant.id}" class="edit-btn mt-4 sm:mt-0 px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-150 ease-in-out">
                                     Editar
                                 </button>
                             </div>
@@ -176,7 +184,15 @@
                     </div>
                 </div>
             `;
-            // Re-initialize map and event listeners
+
+            // Adiciona um listener de eventos para os botões de edição após a renderização
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    handleEdit(e.target.dataset.plantId);
+                });
+            });
+
+            // Re-inicializa o mapa
             if (mapInstance) {
                 mapInstance.remove();
             }
@@ -198,181 +214,235 @@
         };
 
         const getAiDetails = async (plantData) => {
-            // Placeholder for AI processing logic, as the real API call would be a bit complex for a simple example
-            // In a real scenario, you'd make a fetch call here as in the React example.
-            const prompt = `Aumente os detalhes e qualidades da seguinte planta, baseando-se em seus dados, sem modificá-los. Adicione informações de forma aumentativa e não apague nada. Responda em Português. Dados: ${JSON.stringify(plantData)}`;
-            // Simulating a simple AI response for this HTML version
-            return `Esta é uma descrição gerada pela IA baseada nos seus dados de: ${plantData.popularName}, ${plantData.scientificName}, etc. Ela pode incluir informações sobre ecossistema, curiosidades e mais.`;
+            let retryCount = 0;
+            const maxRetries = 3;
+            const initialDelay = 1000;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    const prompt = `Aumente os detalhes e qualidades da seguinte planta, baseando-se em seus dados, sem modificá-los. Adicione informações de forma aumentativa e não apague nada. Responda em Português.
+                    Dados da planta:
+                    Nome Popular: ${plantData.popularName}
+                    Nome Científico: ${plantData.scientificName}
+                    Família Botânica: ${plantData.botanicalFamily}
+                    Características Principais: ${plantData.mainCharacteristics}
+                    Benefícios/Usos: ${plantData.benefitsUses}
+                    Bioma Natural: ${plantData.naturalBiome}
+                    Localização SVCCM: ${plantData.svccmLocation}`;
+
+                    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Resposta da API de IA não contém conteúdo válido.");
+                    }
+                } catch (error) {
+                    console.error('Erro na chamada da API de IA:', error);
+                    retryCount++;
+                    const delay = initialDelay * Math.pow(2, retryCount - 1);
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+            return "Erro ao gerar detalhes com IA.";
         };
 
         const resetForm = () => {
-            document.getElementById('popularName').value = '';
-            document.getElementById('scientificName').value = '';
-            document.getElementById('botanicalFamily').value = '';
-            document.getElementById('mainCharacteristics').value = '';
-            document.getElementById('benefitsUses').value = '';
-            document.getElementById('naturalBiome').value = '';
-            document.getElementById('svccmLocation').value = 'Cidades';
-            document.getElementById('plantImage').value = '';
-            document.getElementById('plantStatus').value = 'Saudável';
-            document.getElementById('annualProduction').value = '';
+            const form = document.getElementById('plant-form');
+            if (form) {
+                form.reset();
+            }
             isEditing = false;
             currentPlantId = null;
             if (mapMarker) {
                 mapInstance.removeLayer(mapMarker);
                 mapMarker = null;
             }
+            document.getElementById('location-text').classList.add('hidden');
+            document.getElementById('location-error').classList.add('hidden');
             renderApp();
         };
 
-        window.handleEdit = (plantId) => {
+        const handleEdit = (plantId) => {
             const plantToEdit = plantsData.find(p => p.id === plantId);
             if (!plantToEdit) return;
 
-            document.getElementById('popularName').value = plantToEdit.popularName;
-            document.getElementById('scientificName').value = plantToEdit.scientificName;
-            document.getElementById('botanicalFamily').value = plantToEdit.botanicalFamily;
-            document.getElementById('mainCharacteristics').value = plantToEdit.mainCharacteristics;
-            document.getElementById('benefitsUses').value = plantToEdit.benefitsUses;
-            document.getElementById('naturalBiome').value = plantToEdit.naturalBiome;
-            document.getElementById('svccmLocation').value = plantToEdit.svccmLocation;
-            document.getElementById('plantStatus').value = plantToEdit.status;
-            document.getElementById('annualProduction').value = plantToEdit.annualProduction;
+            isEditing = true;
+            currentPlantId = plantId;
+            renderApp();
 
+            const form = document.getElementById('plant-form');
+            if (form) {
+                form.popularName.value = plantToEdit.popularName;
+                form.scientificName.value = plantToEdit.scientificName;
+                form.botanicalFamily.value = plantToEdit.botanicalFamily;
+                form.mainCharacteristics.value = plantToEdit.mainCharacteristics;
+                form.benefitsUses.value = plantToEdit.benefitsUses;
+                form.naturalBiome.value = plantToEdit.naturalBiome;
+                form.svccmLocation.value = plantToEdit.svccmLocation;
+                form.plantStatus.value = plantToEdit.status;
+                form.annualProduction.value = plantToEdit.annualProduction;
+            }
+            
             if (mapMarker) {
                 mapInstance.removeLayer(mapMarker);
-                mapMarker = null;
             }
             mapInstance.setView([plantToEdit.location.latitude, plantToEdit.location.longitude], 13);
             const marker = L.marker([plantToEdit.location.latitude, plantToEdit.location.longitude], { draggable: true }).addTo(mapInstance);
             marker.on('dragend', (e) => {
                 const newLatLng = e.target.getLatLng();
-                plantToEdit.location.latitude = newLatLng.lat;
-                plantToEdit.location.longitude = newLatLng.lng;
+                document.getElementById('location-text').textContent = `Localização (arrastável): ${newLatLng.lat.toFixed(4)}, ${newLatLng.lng.toFixed(4)}`;
             });
             mapMarker = marker;
-
-            isEditing = true;
-            currentPlantId = plantId;
-            renderApp();
+            document.getElementById('location-text').textContent = `Localização (arrastável): ${plantToEdit.location.latitude.toFixed(4)}, ${plantToEdit.location.longitude.toFixed(4)}`;
+            document.getElementById('location-text').classList.remove('hidden');
         };
 
-        document.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const popularName = form.popularName.value;
-            const scientificName = form.scientificName.value;
-            const botanicalFamily = form.botanicalFamily.value;
-            const mainCharacteristics = form.mainCharacteristics.value;
-            const benefitsUses = form.benefitsUses.value;
-            const naturalBiome = form.naturalBiome.value;
-            const svccmLocation = form.svccmLocation.value;
-            const plantImageFile = form.plantImage.files[0];
-            const plantStatus = form.plantStatus.value;
-            const annualProduction = form.annualProduction.value;
+        const initApp = async () => {
+            try {
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
 
-            if (!popularName || (!isEditing && !plantImageFile)) {
-                alert('Por favor, preencha o nome popular e selecione uma imagem.');
-                return;
-            }
-
-            if (!isEditing && mapMarker) {
-                const location = mapMarker.getLatLng();
-                const plantData = {
-                    popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
-                    location: { latitude: location.lat, longitude: location.lng },
-                    status: plantStatus, annualProduction,
-                };
-                plantData.aiDetails = await getAiDetails(plantData);
-                if (plantImageFile) {
-                    plantData.image = await fileToBase64(plantImageFile);
-                }
-
-                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-                await addDoc(collection(db, collectionPath), plantData);
-            } else if (isEditing && currentPlantId) {
-                const plantToUpdate = plantsData.find(p => p.id === currentPlantId);
-                const updatedData = {
-                    popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
-                    location: { latitude: mapMarker.getLatLng().lat, longitude: mapMarker.getLatLng().lng },
-                    status: plantStatus, annualProduction,
-                    updatedAt: serverTimestamp(),
-                };
-                if (plantImageFile) {
-                    updatedData.image = await fileToBase64(plantImageFile);
-                }
-                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-                const plantDocRef = doc(db, collectionPath, currentPlantId);
-                await setDoc(plantDocRef, updatedData, { merge: true });
-            }
-
-            resetForm();
-        });
-
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'getLocationBtn') {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        const newLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-                        document.getElementById('location-text').textContent = `Localização (arrastável): ${newLocation.latitude.toFixed(4)}, ${newLocation.longitude.toFixed(4)}`;
-                        document.getElementById('location-text').classList.remove('hidden');
-                        if (mapMarker) {
-                            mapInstance.removeLayer(mapMarker);
-                        }
-                        const marker = L.marker([newLocation.latitude, newLocation.longitude], { draggable: true }).addTo(mapInstance);
-                        marker.on('dragend', (e) => {
-                            const newLatLng = e.target.getLatLng();
-                            document.getElementById('location-text').textContent = `Localização (arrastável): ${newLatLng.lat.toFixed(4)}, ${newLatLng.lng.toFixed(4)}`;
-                        });
-                        mapMarker = marker;
-                        mapInstance.setView([newLocation.latitude, newLocation.longitude], 13);
-                    }, (error) => {
-                        document.getElementById('location-error').textContent = 'Não foi possível obter a localização.';
-                        document.getElementById('location-error').classList.remove('hidden');
-                    });
+                // Wait for authentication
+                const user = await new Promise(resolve => onAuthStateChanged(auth, resolve));
+                if (user) {
+                    userId = user.uid;
                 } else {
-                    document.getElementById('location-error').textContent = 'Geolocalização não é suportada.';
-                    document.getElementById('location-error').classList.remove('hidden');
-                }
-            } else if (e.target.id === 'cancel-btn') {
-                resetForm();
-            }
-        });
-        
-        const initFirebase = async () => {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            await new Promise(resolve => {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        resolve();
-                    } else {
-                        try {
-                            await signInAnonymously(auth);
-                            userId = auth.currentUser.uid;
-                            resolve();
-                        } catch (error) {
-                            console.error("Erro ao fazer login anônimo:", error);
-                            resolve();
-                        }
-                    }
-                });
-            });
-
-            if (initialAuthToken) {
-                try {
-                    await signInWithCustomToken(auth, initialAuthToken);
+                    await signInAnonymously(auth);
                     userId = auth.currentUser.uid;
-                } catch (error) {
-                    console.error("Erro ao fazer login com token personalizado:", error);
                 }
-            }
 
-            const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-            onSnapshot(collection(db, collectionPath), (querySnapshot) => {
-                plantsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderApp();
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        userId = auth.currentUser.uid;
+                    } catch (error) {
+                        console.error("Erro ao fazer login com token personalizado:", error);
+                    }
+                }
+                
+                // Set up real-time listener for plants
+                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
+                onSnapshot(collection(db, collectionPath), (querySnapshot) => {
+                    plantsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderApp();
+                });
+            } catch (error) {
+                console.error("Erro na inicialização do aplicativo:", error);
+                appRoot.innerHTML = `<div class="p-4 text-red-400 text-center">Ocorreu um erro ao carregar o aplicativo. Verifique o console para mais detalhes.</div>`;
+            }
+        };
+
+        // Adiciona um listener para os eventos de formulário e botões
+        document.addEventListener('DOMContentLoaded', () => {
+            appRoot.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const popularName = form.popularName.value;
+                const scientificName = form.scientificName.value;
+                const botanicalFamily = form.botanicalFamily.value;
+                const mainCharacteristics = form.mainCharacteristics.value;
+                const benefitsUses = form.benefitsUses.value;
+                const naturalBiome = form.naturalBiome.value;
+                const svccmLocation = form.svccmLocation.value;
+                const plantImageFile = form.plantImage.files[0];
+                const plantStatus = form.plantStatus.value;
+                const annualProduction = form.annualProduction.value;
+
+                if (!popularName || (!isEditing && !plantImageFile)) {
+                    alert('Por favor, preencha o nome popular e selecione uma imagem.');
+                    return;
+                }
+                
+                let location = mapMarker ? mapMarker.getLatLng() : null;
+                if (!location) {
+                    alert('Por favor, obtenha a localização primeiro.');
+                    return;
+                }
+
+                if (!isEditing) {
+                    const plantData = {
+                        popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
+                        location: { latitude: location.lat, longitude: location.lng },
+                        status: plantStatus, annualProduction,
+                        userId, createdAt: serverTimestamp(),
+                    };
+                    plantData.aiDetails = await getAiDetails(plantData);
+                    if (plantImageFile) {
+                        plantData.image = await fileToBase64(plantImageFile);
+                    }
+
+                    const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
+                    await addDoc(collection(db, collectionPath), plantData);
+                } else {
+                    const updatedData = {
+                        popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
+                        location: { latitude: location.lat, longitude: location.lng },
+                        status: plantStatus, annualProduction,
+                        updatedAt: serverTimestamp(),
+                    };
+                    if (plantImageFile) {
+                        updatedData.image = await fileToBase64(plantImageFile);
+                    }
+                    const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
+                    const plantDocRef = doc(db, collectionPath, currentPlantId);
+                    await setDoc(plantDocRef, updatedData, { merge: true });
+                }
+                resetForm();
             });
+
+            appRoot.addEventListener('click', (e) => {
+                const targetId = e.target.id;
+                const targetClass = e.target.className;
+                
+                if (targetId === 'getLocationBtn') {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            const newLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+                            document.getElementById('location-text').textContent = `Localização (arrastável): ${newLocation.latitude.toFixed(4)}, ${newLocation.longitude.toFixed(4)}`;
+                            document.getElementById('location-text').classList.remove('hidden');
+                            if (mapMarker) {
+                                mapInstance.removeLayer(mapMarker);
+                            }
+                            const marker = L.marker([newLocation.latitude, newLocation.longitude], { draggable: true }).addTo(mapInstance);
+                            marker.on('dragend', (e) => {
+                                const newLatLng = e.target.getLatLng();
+                                document.getElementById('location-text').textContent = `Localização (arrastável): ${newLatLng.lat.toFixed(4)}, ${newLatLng.lng.toFixed(4)}`;
+                            });
+                            mapMarker = marker;
+                            mapInstance.setView([newLocation.latitude, newLocation.longitude], 13);
+                        }, (error) => {
+                            document.getElementById('location-error').textContent = 'Não foi possível obter a localização.';
+                            document.getElementById('location-error').classList.remove('hidden');
+                        });
+                    } else {
+                        document.getElementById('location-error').textContent = 'Geolocalização não é suportada.';
+                        document.getElementById('location-error').classList.remove('hidden');
+                    }
+                } else if (targetId === 'cancel-btn') {
+                    resetForm();
+                } else if (targetClass && targetClass.includes('edit-btn')) {
+                    handleEdit(e.target.dataset.plantId);
+                }
+            });
+
+            initApp();
+        });
+    </script>
+</body>
+</html>
