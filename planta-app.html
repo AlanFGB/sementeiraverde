@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jardim Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIINf0yA+lTj0W+L8d6w6xS9dD+y1P5b+gM="
+        crossorigin="" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #map {
+            height: 256px;
+            border-radius: 0.75rem;
+            border: 1px solid #4B5563;
+        }
+        .loading-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 p-4 sm:p-8 antialiased">
+    <div id="app-root" class="max-w-4xl mx-auto p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
+        <div class="loading-container">
+            <div class="text-center">
+                <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2 text-lg">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-200lP4x4Lp8qV9zGk5L6t7n6gPz9yGvF3N5eNl+bC8E="
+        crossorigin=""></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables from the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+        
+        let app, db, auth;
+        let userId = null;
+        let plantsData = [];
+        let mapInstance = null;
+        let mapMarker = null;
+        let isEditing = false;
+        let currentPlantId = null;
+
+        const appRoot = document.getElementById('app-root');
+
+        const renderApp = () => {
+            appRoot.innerHTML = `
+                <header class="text-center mb-8">
+                    <h1 class="text-4xl font-extrabold text-green-400 mb-2">Jardim Digital</h1>
+                    <p class="text-lg text-gray-400">Registre suas plantas com fotos e geolocalização.</p>
+                    ${userId ? `<p class="mt-2 text-sm text-gray-500">ID do Usuário: ${userId}</p>` : ''}
+                </header>
+
+                <div class="bg-gray-700 p-6 rounded-xl shadow-lg mb-8 border border-gray-600">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-gray-200" id="form-title">
+                        ${isEditing ? 'Editar Planta Existente' : 'Adicionar Nova Planta'}
+                    </h2>
+                    <form id="plant-form" class="space-y-4">
+                        <div>
+                            <label for="popularName" class="block text-sm font-medium text-gray-300">Nome Popular</label>
+                            <input type="text" id="popularName" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Ipê-roxo" required />
+                        </div>
+                        <div>
+                            <label for="scientificName" class="block text-sm font-medium text-gray-300">Nome Científico</label>
+                            <input type="text" id="scientificName" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Handroanthus impetiginosus" />
+                        </div>
+                        <div>
+                            <label for="botanicalFamily" class="block text-sm font-medium text-gray-300">Família Botânica</label>
+                            <input type="text" id="botanicalFamily" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Bignoniaceae" />
+                        </div>
+                        <div>
+                            <label for="mainCharacteristics" class="block text-sm font-medium text-gray-300">Características Principais</label>
+                            <textarea id="mainCharacteristics" rows="2" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Porte grande, floração exuberante em rosa"></textarea>
+                        </div>
+                        <div>
+                            <label for="benefitsUses" class="block text-sm font-medium text-gray-300">Benefícios/Usos</label>
+                            <textarea id="benefitsUses" rows="2" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Medicinal, ornamental, atrai polinizadores"></textarea>
+                        </div>
+                        <div>
+                            <label for="naturalBiome" class="block text-sm font-medium text-gray-300">Bioma/Habitat Natural</label>
+                            <input type="text" id="naturalBiome" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Mata Atlântica" />
+                        </div>
+                        <div>
+                            <label for="svccmLocation" class="block text-sm font-medium text-gray-300">Localização SVCCM</label>
+                            <select id="svccmLocation" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white">
+                                <option value="Cidades">Cidades</option>
+                                <option value="Campos">Campos</option>
+                                <option value="Matas">Matas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="plantStatus" class="block text-sm font-medium text-gray-300">Status da Planta</label>
+                            <select id="plantStatus" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white">
+                                <option value="Saudável">Saudável</option>
+                                <option value="Doente">Doente</option>
+                                <option value="Morta">Morta</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="annualProduction" class="block text-sm font-medium text-gray-300">Produção Anual</label>
+                            <input type="text" id="annualProduction" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: 5kg de frutos" />
+                        </div>
+                        <div>
+                            <label for="plantImage" class="block text-sm font-medium text-gray-300">Imagem da Planta</label>
+                            <input type="file" id="plantImage" accept="image/*" class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" />
+                            ${isEditing ? '<p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a imagem existente.</p>' : ''}
+                        </div>
+                        <div class="space-y-2">
+                            <button type="button" id="getLocationBtn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                                Obter Minha Localização
+                            </button>
+                            <p id="location-text" class="mt-2 text-sm text-gray-300 text-center hidden"></p>
+                            <div id="map" class="w-full h-64 rounded-lg border border-gray-600"></div>
+                            <p id="location-error" class="mt-2 text-sm text-red-400 text-center hidden"></p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="submit" id="submit-btn" class="flex-1 inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                                ${isEditing ? 'Atualizar Planta' : 'Salvar Planta'}
+                            </button>
+                            ${isEditing ? `
+                                <button type="button" id="cancel-btn" class="flex-1 inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                                    Cancelar
+                                </button>
+                            ` : ''}
+                        </div>
+                    </form>
+                </div>
+
+                <hr class="border-gray-600 my-8" />
+
+                <div class="bg-gray-700 p-6 rounded-xl shadow-lg border border-gray-600">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-gray-200">Minhas Plantas Salvas</h2>
+                    <div id="plant-list" class="space-y-6">
+                        ${plantsData.length > 0 ? plantsData.map(plant => `
+                            <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 border border-gray-700">
+                                ${plant.image ? `<img src="${plant.image}" alt="${plant.popularName}" class="w-full sm:w-32 h-32 object-cover rounded-lg shadow-inner" />` : ''}
+                                <div class="flex-1 text-center sm:text-left">
+                                    <h3 class="text-xl font-semibold text-green-300">${plant.popularName}</h3>
+                                    <p class="mt-1 text-sm text-gray-400"><span class="font-bold">ID da Planta:</span> ${plant.id}</p>
+                                    ${plant.scientificName ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Nome Científico:</span> ${plant.scientificName}</p>` : ''}
+                                    ${plant.botanicalFamily ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Família Botânica:</span> ${plant.botanicalFamily}</p>` : ''}
+                                    ${plant.mainCharacteristics ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Características:</span> ${plant.mainCharacteristics}</p>` : ''}
+                                    ${plant.benefitsUses ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Usos:</span> ${plant.benefitsUses}</p>` : ''}
+                                    ${plant.naturalBiome ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Bioma:</span> ${plant.naturalBiome}</p>` : ''}
+                                    ${plant.svccmLocation ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Localização SVCCM:</span> ${plant.svccmLocation}</p>` : ''}
+                                    <p class="mt-1 text-sm text-gray-400"><span class="font-bold">Localização GPS:</span> ${plant.location.latitude.toFixed(4)}, ${plant.location.longitude.toFixed(4)}</p>
+                                    <p class="mt-1 text-sm text-gray-400"><span class="font-bold">Status:</span> ${plant.status}</p>
+                                    ${plant.annualProduction ? `<p class="mt-1 text-sm text-gray-400"><span class="font-bold">Produção Anual:</span> ${plant.annualProduction}</p>` : ''}
+                                    ${plant.aiDetails ? `<div class="mt-2 p-2 bg-gray-700 rounded-lg"><p class="font-bold text-sm text-green-300">Detalhes Adicionais da IA:</p><p class="text-sm text-gray-400 whitespace-pre-wrap">${plant.aiDetails}</p></div>` : ''}
+                                    ${plant.createdAt ? `<p class="mt-1 text-xs text-gray-500"><span class="font-bold">Salvo em:</span> ${new Date(plant.createdAt.toDate()).toLocaleString()}</p>` : ''}
+                                </div>
+                                <button onclick="handleEdit('${plant.id}')" class="mt-4 sm:mt-0 px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-150 ease-in-out">
+                                    Editar
+                                </button>
+                            </div>
+                        `).join('') : '<p class="text-center text-gray-400 italic">Nenhuma planta registrada ainda.</p>'}
+                    </div>
+                </div>
+            `;
+            // Re-initialize map and event listeners
+            if (mapInstance) {
+                mapInstance.remove();
+            }
+            if (document.getElementById('map')) {
+                mapInstance = L.map('map').setView([-23.5505, -46.6333], 5);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(mapInstance);
+            }
+        };
+
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        };
+
+        const getAiDetails = async (plantData) => {
+            // Placeholder for AI processing logic, as the real API call would be a bit complex for a simple example
+            // In a real scenario, you'd make a fetch call here as in the React example.
+            const prompt = `Aumente os detalhes e qualidades da seguinte planta, baseando-se em seus dados, sem modificá-los. Adicione informações de forma aumentativa e não apague nada. Responda em Português. Dados: ${JSON.stringify(plantData)}`;
+            // Simulating a simple AI response for this HTML version
+            return `Esta é uma descrição gerada pela IA baseada nos seus dados de: ${plantData.popularName}, ${plantData.scientificName}, etc. Ela pode incluir informações sobre ecossistema, curiosidades e mais.`;
+        };
+
+        const resetForm = () => {
+            document.getElementById('popularName').value = '';
+            document.getElementById('scientificName').value = '';
+            document.getElementById('botanicalFamily').value = '';
+            document.getElementById('mainCharacteristics').value = '';
+            document.getElementById('benefitsUses').value = '';
+            document.getElementById('naturalBiome').value = '';
+            document.getElementById('svccmLocation').value = 'Cidades';
+            document.getElementById('plantImage').value = '';
+            document.getElementById('plantStatus').value = 'Saudável';
+            document.getElementById('annualProduction').value = '';
+            isEditing = false;
+            currentPlantId = null;
+            if (mapMarker) {
+                mapInstance.removeLayer(mapMarker);
+                mapMarker = null;
+            }
+            renderApp();
+        };
+
+        window.handleEdit = (plantId) => {
+            const plantToEdit = plantsData.find(p => p.id === plantId);
+            if (!plantToEdit) return;
+
+            document.getElementById('popularName').value = plantToEdit.popularName;
+            document.getElementById('scientificName').value = plantToEdit.scientificName;
+            document.getElementById('botanicalFamily').value = plantToEdit.botanicalFamily;
+            document.getElementById('mainCharacteristics').value = plantToEdit.mainCharacteristics;
+            document.getElementById('benefitsUses').value = plantToEdit.benefitsUses;
+            document.getElementById('naturalBiome').value = plantToEdit.naturalBiome;
+            document.getElementById('svccmLocation').value = plantToEdit.svccmLocation;
+            document.getElementById('plantStatus').value = plantToEdit.status;
+            document.getElementById('annualProduction').value = plantToEdit.annualProduction;
+
+            if (mapMarker) {
+                mapInstance.removeLayer(mapMarker);
+                mapMarker = null;
+            }
+            mapInstance.setView([plantToEdit.location.latitude, plantToEdit.location.longitude], 13);
+            const marker = L.marker([plantToEdit.location.latitude, plantToEdit.location.longitude], { draggable: true }).addTo(mapInstance);
+            marker.on('dragend', (e) => {
+                const newLatLng = e.target.getLatLng();
+                plantToEdit.location.latitude = newLatLng.lat;
+                plantToEdit.location.longitude = newLatLng.lng;
+            });
+            mapMarker = marker;
+
+            isEditing = true;
+            currentPlantId = plantId;
+            renderApp();
+        };
+
+        document.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const popularName = form.popularName.value;
+            const scientificName = form.scientificName.value;
+            const botanicalFamily = form.botanicalFamily.value;
+            const mainCharacteristics = form.mainCharacteristics.value;
+            const benefitsUses = form.benefitsUses.value;
+            const naturalBiome = form.naturalBiome.value;
+            const svccmLocation = form.svccmLocation.value;
+            const plantImageFile = form.plantImage.files[0];
+            const plantStatus = form.plantStatus.value;
+            const annualProduction = form.annualProduction.value;
+
+            if (!popularName || (!isEditing && !plantImageFile)) {
+                alert('Por favor, preencha o nome popular e selecione uma imagem.');
+                return;
+            }
+
+            if (!isEditing && mapMarker) {
+                const location = mapMarker.getLatLng();
+                const plantData = {
+                    popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
+                    location: { latitude: location.lat, longitude: location.lng },
+                    status: plantStatus, annualProduction,
+                };
+                plantData.aiDetails = await getAiDetails(plantData);
+                if (plantImageFile) {
+                    plantData.image = await fileToBase64(plantImageFile);
+                }
+
+                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
+                await addDoc(collection(db, collectionPath), plantData);
+            } else if (isEditing && currentPlantId) {
+                const plantToUpdate = plantsData.find(p => p.id === currentPlantId);
+                const updatedData = {
+                    popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
+                    location: { latitude: mapMarker.getLatLng().lat, longitude: mapMarker.getLatLng().lng },
+                    status: plantStatus, annualProduction,
+                    updatedAt: serverTimestamp(),
+                };
+                if (plantImageFile) {
+                    updatedData.image = await fileToBase64(plantImageFile);
+                }
+                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
+                const plantDocRef = doc(db, collectionPath, currentPlantId);
+                await setDoc(plantDocRef, updatedData, { merge: true });
+            }
+
+            resetForm();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'getLocationBtn') {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const newLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+                        document.getElementById('location-text').textContent = `Localização (arrastável): ${newLocation.latitude.toFixed(4)}, ${newLocation.longitude.toFixed(4)}`;
+                        document.getElementById('location-text').classList.remove('hidden');
+                        if (mapMarker) {
+                            mapInstance.removeLayer(mapMarker);
+                        }
+                        const marker = L.marker([newLocation.latitude, newLocation.longitude], { draggable: true }).addTo(mapInstance);
+                        marker.on('dragend', (e) => {
+                            const newLatLng = e.target.getLatLng();
+                            document.getElementById('location-text').textContent = `Localização (arrastável): ${newLatLng.lat.toFixed(4)}, ${newLatLng.lng.toFixed(4)}`;
+                        });
+                        mapMarker = marker;
+                        mapInstance.setView([newLocation.latitude, newLocation.longitude], 13);
+                    }, (error) => {
+                        document.getElementById('location-error').textContent = 'Não foi possível obter a localização.';
+                        document.getElementById('location-error').classList.remove('hidden');
+                    });
+                } else {
+                    document.getElementById('location-error').textContent = 'Geolocalização não é suportada.';
+                    document.getElementById('location-error').classList.remove('hidden');
+                }
+            } else if (e.target.id === 'cancel-btn') {
+                resetForm();
+            }
+        });
+        
+        const initFirebase = async () => {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            await new Promise(resolve => {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        resolve();
+                    } else {
+                        try {
+                            await signInAnonymously(auth);
+                            userId = auth.currentUser.uid;
+                            resolve();
+                        } catch (error) {
+                            console.error("Erro ao fazer login anônimo:", error);
+                            resolve();
+                        }
+                    }
+                });
+            });
+
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    userId = auth.currentUser.uid;
+                } catch (error) {
+                    console.error("Erro ao fazer login com token personalizado:", error);
+                }
+            }
+
+            const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
+            onSnapshot(collection(db, collectionPath), (querySnapshot) => {
+                plantsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderApp();
+            });
