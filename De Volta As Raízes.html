@@ -1,562 +1,95 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jardim Digital</title>
-    <!-- Inclui o Tailwind CSS para estilização -->
+    <title>Sementeira Verde - Nossos Assuntos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inclui o Leaflet CSS para o mapa -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIINf0yA+lTj0W+L8d6w6xS9dD+y1P5b+gM="
-        crossorigin="" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-        }
-        #map {
-            height: 256px;
-            border-radius: 0.75rem;
-            border: 1px solid #4B5563;
-        }
-        .loading-container, .error-container {
-            min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
             flex-direction: column;
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            min-height: 100vh;
+            margin: 0;
+            
+            /* ESTILOS PARA IMAGEM DE FUNDO (pode ser a mesma ou diferente) */
+            background-image: url('Imagens/_AS15320 (1) (1).jpg'); /* Certifique-se de que este caminho está correto no seu repositório */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            
+            color: #ffffff;
         }
-        .modal-content {
-            background-color: #1f2937;
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Um pouco mais opaco */
             padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid #4b5563;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
             max-width: 90%;
-            width: 400px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 700px; /* Largura um pouco maior para a página de conteúdo */
+            color: #2f4f4f;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #006400;
+            font-size: 2.5rem; /* Título maior */
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        h3 { /* Estilo para subtítulos de artigos */
+            color: #2e8b57;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            text-align: left;
+        }
+        p {
+            color: #4a5568;
+            font-size: 1.125rem;
+            line-height: 1.6; /* Espaçamento entre linhas */
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #32cd32; /* Verde limão */
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .back-link:hover {
+            background-color: #228b22; /* Verde floresta escuro */
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #cbd5e0;
+            margin: 2rem 0;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 p-4 sm:p-8 antialiased">
-    <!-- O contêiner principal onde o aplicativo será renderizado -->
-    <div id="app-root" class="max-w-4xl mx-auto p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
-        <div class="loading-container">
-            <div class="text-center">
-                <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p class="mt-2 text-lg">Carregando...</p>
-            </div>
-        </div>
-    </div>
+<body>
+    <div class="container">
+        <h1>De Volta As Raízes</h1>
+        <p>Venha conhecer a maior e melhor linha de cogumelos fitoterápicos 100% naturais, são vários beneficios para a saúde e para seu dia. Conheça mais pelo site e confira as melhores promoções com nosso revendedor.
 
-    <!-- Modal de confirmação para exclusão -->
-    <div id="delete-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4 text-gray-200">Confirmar Exclusão</h3>
-            <p class="text-gray-300 mb-6">Tem certeza de que deseja excluir esta planta? Esta ação não pode ser desfeita.</p>
-            <div class="flex justify-end space-x-4">
-                <button id="cancel-delete-btn" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition duration-150 ease-in-out">
-                    Cancelar
-                </button>
-                <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-150 ease-in-out">
-                    Excluir
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para mensagens de erro -->
-    <div id="error-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4 text-red-400">Atenção</h3>
-            <p id="error-modal-message" class="text-gray-300 mb-6"></p>
-            <div class="flex justify-end">
-                <button id="close-error-modal-btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-150 ease-in-out">
-                    Ok
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Inclui o Leaflet JS para a funcionalidade do mapa -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-200lP4x4Lp8qV9zGk5L6t7n6gPz9yGvF3N5eNl+bC8E="
-        crossorigin=""></script>
-    
-    <!-- Inclui os módulos do Firebase e o código principal do aplicativo -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Variáveis globais fornecidas pelo ambiente do Canvas
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+ Mais informações com o Representane Comercial <a href="https://wa.me/5549998107919?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20a%20Sementeira%20Verde.">WhatsApp</a>.</p> <a href="https://devoltaasraizes.com.br/">De Volta As Raízes</a></p>
         
-        let db, auth;
-        let userId = null;
-        let plantsData = [];
-        let mapInstance = null;
-        let isEditing = false;
-        let currentPlantId = null;
-        let currentLatitude = null;
-        let currentLongitude = null;
+        <hr>
 
-        const appRoot = document.getElementById('app-root');
-        const deleteModal = document.getElementById('delete-modal');
-        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-        const errorModal = document.getElementById('error-modal');
-        const errorModalMessage = document.getElementById('error-modal-message');
-        const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
 
-        // Mapeia as regiões para coordenadas geográficas para o mapa
-        const regionCoordinates = {
-            'Cidades': [-23.5505, -46.6333], // Exemplo: São Paulo
-            'Campos': [-28.2618, -52.4101], // Exemplo: Rio Grande do Sul
-            'Matas': [-9.9702, -50.7719], // Exemplo: Floresta Amazônica
-        };
-
-        // Função para exibir o modal de erro
-        const showErrorModal = (message) => {
-            errorModalMessage.textContent = message;
-            errorModal.classList.remove('hidden');
-        };
-
-        // Função para obter a localização do usuário
-        const getUserLocation = () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        currentLatitude = position.coords.latitude;
-                        currentLongitude = position.coords.longitude;
-                        console.log("Localização obtida: ", currentLatitude, currentLongitude);
-                    },
-                    (error) => {
-                        console.error("Erro ao obter a localização:", error);
-                        showErrorModal("Não foi possível obter sua localização. Por favor, habilite a geolocalização.");
-                    }
-                );
-            } else {
-                showErrorModal("A geolocalização não é suportada por este navegador.");
-            }
-        };
-
-        // Renderiza toda a interface do aplicativo no elemento root
-        const renderApp = () => {
-            // Agrupar as plantas por região
-            const plantsByRegion = plantsData.reduce((acc, plant) => {
-                const region = plant.svccmLocation || 'Não Especificado';
-                if (!acc[region]) {
-                    acc[region] = [];
-                }
-                acc[region].push(plant);
-                return acc;
-            }, {});
-
-            appRoot.innerHTML = `
-                <header class="text-center mb-8">
-                    <h1 class="text-4xl font-extrabold text-green-400 mb-2">Jardim Digital</h1>
-                    <p class="text-lg text-gray-400">Registre suas plantas por espécie e região.</p>
-                    ${userId ? `<p class="mt-2 text-sm text-gray-500">ID do Usuário: ${userId}</p>` : ''}
-                </header>
-
-                <div class="bg-gray-700 p-6 rounded-xl shadow-lg mb-8 border border-gray-600">
-                    <h2 class="text-2xl font-bold mb-4 text-center text-gray-200" id="form-title">
-                        ${isEditing ? 'Editar Planta Existente' : 'Adicionar Nova Planta'}
-                    </h2>
-                    <form id="plant-form" class="space-y-4">
-                        <input type="hidden" id="latitude" name="latitude" value="${currentLatitude || ''}" />
-                        <input type="hidden" id="longitude" name="longitude" value="${currentLongitude || ''}" />
-                        <div>
-                            <label for="popularName" class="block text-sm font-medium text-gray-300">Nome Popular</label>
-                            <input type="text" id="popularName" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Ipê-roxo" required />
-                        </div>
-                        <div>
-                            <label for="scientificName" class="block text-sm font-medium text-gray-300">Nome Científico</label>
-                            <input type="text" id="scientificName" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Handroanthus impetiginosus" />
-                        </div>
-                        <div>
-                            <label for="botanicalFamily" class="block text-sm font-medium text-gray-300">Família Botânica</label>
-                            <input type="text" id="botanicalFamily" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Bignoniaceae" />
-                        </div>
-                        <div>
-                            <label for="mainCharacteristics" class="block text-sm font-medium text-gray-300">Características Principais</label>
-                            <textarea id="mainCharacteristics" rows="2" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Porte grande, floração exuberante em rosa"></textarea>
-                        </div>
-                        <div>
-                            <label for="benefitsUses" class="block text-sm font-medium text-gray-300">Benefícios/Usos</label>
-                            <textarea id="benefitsUses" rows="2" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Medicinal, ornamental, atrai polinizadores"></textarea>
-                        </div>
-                        <div>
-                            <label for="naturalBiome" class="block text-sm font-medium text-gray-300">Bioma/Habitat Natural</label>
-                            <input type="text" id="naturalBiome" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: Mata Atlântica" />
-                        </div>
-                        <div>
-                            <label for="svccmLocation" class="block text-sm font-medium text-gray-300">Localização SVCCM</label>
-                            <select id="svccmLocation" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white">
-                                <option value="Cidades">Cidades</option>
-                                <option value="Campos">Campos</option>
-                                <option value="Matas">Matas</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="plantStatus" class="block text-sm font-medium text-gray-300">Status da Planta</label>
-                            <select id="plantStatus" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white">
-                                <option value="Saudável">Saudável</option>
-                                <option value="Doente">Doente</option>
-                                <option value="Morta">Morta</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="annualProduction" class="block text-sm font-medium text-gray-300">Produção Anual</label>
-                            <input type="text" id="annualProduction" class="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-white" placeholder="Ex: 5kg de frutos" />
-                        </div>
-                        <div>
-                            <label for="plantImage" class="block text-sm font-medium text-gray-300">Imagem da Planta</label>
-                            <input type="file" id="plantImage" accept="image/*" class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" />
-                            ${isEditing ? '<p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a imagem existente.</p>' : ''}
-                        </div>
-                        <div id="map-container" class="w-full h-64 rounded-lg border border-gray-600">
-                             <div id="map" class="w-full h-full"></div>
-                        </div>
-                        <p class="text-sm text-gray-400 text-center">O mapa exibe uma estimativa e a quantidade de plantas por região.</p>
-                        <div class="flex space-x-2">
-                            <button type="submit" id="submit-btn" class="flex-1 inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
-                                ${isEditing ? 'Atualizar Planta' : 'Salvar Planta'}
-                            </button>
-                            ${isEditing ? `
-                                <button type="button" id="cancel-btn" class="flex-1 inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
-                                    Cancelar
-                                </button>
-                            ` : ''}
-                        </div>
-                    </form>
-                </div>
-
-                <hr class="border-gray-600 my-8" />
-
-                <div class="bg-gray-700 p-6 rounded-xl shadow-lg border border-gray-600">
-                    <h2 class="text-2xl font-bold mb-4 text-center text-gray-200">Minhas Plantas por Região</h2>
-                    <div id="plant-list" class="space-y-6">
-                        ${Object.keys(plantsByRegion).length > 0 ? Object.keys(plantsByRegion).map(region => `
-                            <div class="bg-gray-800 p-4 rounded-xl shadow-md border border-gray-700">
-                                <h3 class="text-xl font-bold text-green-300 mb-4">${region}</h3>
-                                <div class="space-y-4">
-                                    ${plantsByRegion[region].map(plant => `
-                                        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 border-b border-gray-700 pb-4 last:border-b-0 last:pb-0">
-                                            ${plant.image ? `<img src="${plant.image}" alt="${plant.popularName}" class="w-full sm:w-24 h-24 object-cover rounded-lg shadow-inner" />` : ''}
-                                            <div class="flex-1 text-center sm:text-left">
-                                                <h4 class="text-lg font-semibold text-gray-200">${plant.popularName}</h4>
-                                                ${plant.scientificName ? `<p class="mt-1 text-sm text-gray-400 italic">${plant.scientificName}</p>` : ''}
-                                            </div>
-                                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4 sm:mt-0">
-                                                <button data-plant-id="${plant.id}" class="edit-btn px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-150 ease-in-out">
-                                                    Editar
-                                                </button>
-                                                <button data-plant-id="${plant.id}" class="delete-btn px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
-                                                    Excluir
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('') : '<p class="text-center text-gray-400 italic">Nenhuma planta registrada ainda.</p>'}
-                    </div>
-                </div>
-            `;
-            
-            // Re-inicializa o mapa após o HTML ser injetado
-            if (document.getElementById('map') && typeof L !== 'undefined') {
-                if (mapInstance) {
-                    mapInstance.remove();
-                }
-                mapInstance = L.map('map').setView([-14.235, -51.9253], 4); // Foca no Brasil
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(mapInstance);
-
-                // Adiciona marcadores para as regiões com a contagem de plantas
-                for (const region in plantsByRegion) {
-                    const plantCount = plantsByRegion[region].length;
-                    if (regionCoordinates[region]) {
-                        L.marker(regionCoordinates[region]).addTo(mapInstance)
-                            .bindPopup(`<b>${region}</b><br>Plantas registradas: ${plantCount}`);
-                    }
-                }
-            }
-        };
-
-        const fileToBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = (error) => reject(error);
-                reader.readAsDataURL(file);
-            });
-        };
-
-        // Função para obter detalhes da IA sobre a planta
-        const getAiDetails = async (plantData) => {
-            let retryCount = 0;
-            const maxRetries = 3;
-            const initialDelay = 1000;
-            
-            while (retryCount < maxRetries) {
-                try {
-                    const prompt = `Aumente os detalhes e qualidades da seguinte planta, baseando-se em seus dados, sem modificá-los. Adicione informações de forma aumentativa e não apague nada. Responda em Português.
-                    Dados da planta:
-                    Nome Popular: ${plantData.popularName}
-                    Nome Científico: ${plantData.scientificName}
-                    Família Botânica: ${plantData.botanicalFamily}
-                    Características Principais: ${plantData.mainCharacteristics}
-                    Benefícios/Usos: ${plantData.benefitsUses}
-                    Bioma Natural: ${plantData.naturalBiome}
-                    Localização SVCCM: ${plantData.svccmLocation}`;
-
-                    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                    const payload = { contents: chatHistory };
-                    const apiKey = "";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const result = await response.json();
-                    
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        return result.candidates[0].content.parts[0].text;
-                    } else {
-                        throw new Error("Resposta da API de IA não contém conteúdo válido.");
-                    }
-                } catch (error) {
-                    console.error('Erro na chamada da API de IA:', error);
-                    retryCount++;
-                    const delay = initialDelay * Math.pow(2, retryCount - 1);
-                    await new Promise(res => setTimeout(res, delay));
-                }
-            }
-            return "Erro ao gerar detalhes com IA.";
-        };
-
-        const resetForm = () => {
-            const form = document.getElementById('plant-form');
-            if (form) {
-                form.reset();
-                form.querySelector('#latitude').value = currentLatitude || '';
-                form.querySelector('#longitude').value = currentLongitude || '';
-            }
-            isEditing = false;
-            currentPlantId = null;
-            renderApp();
-        };
-
-        const handleEdit = (plantId) => {
-            const plantToEdit = plantsData.find(p => p.id === plantId);
-            if (!plantToEdit) return;
-
-            isEditing = true;
-            currentPlantId = plantId;
-            renderApp();
-
-            const form = document.getElementById('plant-form');
-            if (form) {
-                form.popularName.value = plantToEdit.popularName;
-                form.scientificName.value = plantToEdit.scientificName;
-                form.botanicalFamily.value = plantToEdit.botanicalFamily;
-                form.mainCharacteristics.value = plantToEdit.mainCharacteristics;
-                form.benefitsUses.value = plantToEdit.benefitsUses;
-                form.naturalBiome.value = plantToEdit.naturalBiome;
-                form.svccmLocation.value = plantToEdit.svccmLocation;
-                form.plantStatus.value = plantToEdit.status;
-                form.annualProduction.value = plantToEdit.annualProduction;
-                form.latitude.value = plantToEdit.latitude;
-                form.longitude.value = plantToEdit.longitude;
-            }
-        };
-
-        // Função para excluir uma planta
-        const handleDelete = async (plantId) => {
-            if (userId && appId) {
-                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-                const plantDocRef = doc(db, collectionPath, plantId);
-                try {
-                    await deleteDoc(plantDocRef);
-                } catch (error) {
-                    console.error("Erro ao excluir documento: ", error);
-                }
-            } else {
-                console.error("Usuário ou ID do aplicativo não definidos.");
-            }
-        };
-
-        // Função principal de inicialização do aplicativo
-        const initApp = async () => {
-            try {
-                // Inicializa o Firebase
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Espera pela autenticação
-                const user = await new Promise(resolve => onAuthStateChanged(auth, resolve));
-                if (user) {
-                    userId = user.uid;
-                } else {
-                    await signInAnonymously(auth);
-                    userId = auth.currentUser.uid;
-                }
-
-                if (initialAuthToken) {
-                    try {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser.uid;
-                    } catch (error) {
-                        console.error("Erro ao fazer login com token personalizado:", error);
-                    }
-                }
-                
-                // Configura um ouvinte de tempo real para as plantas
-                const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-                onSnapshot(collection(db, collectionPath), (querySnapshot) => {
-                    plantsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderApp();
-                });
-
-                // Oculta o loading e exibe a aplicação
-                document.querySelector('.loading-container').remove();
-                // Obtém a localização do usuário ao iniciar o app
-                getUserLocation();
-
-            } catch (error) {
-                console.error("Erro na inicialização do aplicativo:", error);
-                appRoot.innerHTML = `<div class="error-container text-center text-red-400">
-                                        <p class="text-xl">Ocorreu um erro ao carregar o aplicativo.</p>
-                                        <p class="mt-2 text-sm">Verifique o console para mais detalhes.</p>
-                                    </div>`;
-            }
-        };
-
-        // Adiciona um listener para os eventos de formulário e botões
-        document.addEventListener('DOMContentLoaded', () => {
-            appRoot.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const form = e.target;
-                const popularName = form.popularName.value;
-                const plantImageFile = form.plantImage.files[0];
-                const svccmLocation = form.svccmLocation.value;
-                const latitude = form.latitude.value;
-                const longitude = form.longitude.value;
-
-                if (!popularName) {
-                    showErrorModal('Por favor, preencha o campo de "Nome Popular".');
-                    return;
-                }
-                if (!isEditing && !plantImageFile) {
-                    showErrorModal('Por favor, selecione uma imagem para a planta.');
-                    return;
-                }
-                if (!latitude || !longitude) {
-                     showErrorModal('Não foi possível obter a localização. Tente novamente mais tarde.');
-                     return;
-                }
-                
-                // Obtenção dos outros dados do formulário
-                const scientificName = form.scientificName.value;
-                const botanicalFamily = form.botanicalFamily.value;
-                const mainCharacteristics = form.mainCharacteristics.value;
-                const benefitsUses = form.benefitsUses.value;
-                const naturalBiome = form.naturalBiome.value;
-                const plantStatus = form.plantStatus.value;
-                const annualProduction = form.annualProduction.value;
-
-                if (!isEditing) {
-                    const plantData = {
-                        popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
-                        status: plantStatus, annualProduction, latitude, longitude,
-                        userId, createdAt: serverTimestamp(),
-                    };
-                    plantData.aiDetails = await getAiDetails(plantData);
-                    if (plantImageFile) {
-                        plantData.image = await fileToBase64(plantImageFile);
-                    }
-
-                    const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-                    await addDoc(collection(db, collectionPath), plantData);
-                } else {
-                    const updatedData = {
-                        popularName, scientificName, botanicalFamily, mainCharacteristics, benefitsUses, naturalBiome, svccmLocation,
-                        status: plantStatus, annualProduction, latitude, longitude,
-                        updatedAt: serverTimestamp(),
-                    };
-                    if (plantImageFile) {
-                        updatedData.image = await fileToBase64(plantImageFile);
-                    }
-                    const collectionPath = `artifacts/${appId}/users/${userId}/plants`;
-                    const plantDocRef = doc(db, collectionPath, currentPlantId);
-                    await setDoc(plantDocRef, updatedData, { merge: true });
-                }
-                resetForm();
-            });
-
-            appRoot.addEventListener('click', (e) => {
-                const targetId = e.target.id;
-                const targetClassList = e.target.classList;
-                const plantId = e.target.dataset.plantId;
-                
-                if (targetId === 'cancel-btn') {
-                    resetForm();
-                } else if (targetClassList.contains('edit-btn')) {
-                    handleEdit(plantId);
-                } else if (targetClassList.contains('delete-btn')) {
-                    deleteModal.classList.remove('hidden');
-                    confirmDeleteBtn.dataset.plantId = plantId;
-                }
-            });
-
-            // Listeners para os modais
-            deleteModal.addEventListener('click', (e) => {
-                if (e.target === deleteModal || e.target === cancelDeleteBtn) {
-                    deleteModal.classList.add('hidden');
-                }
-            });
-
-            confirmDeleteBtn.addEventListener('click', () => {
-                const plantIdToDelete = confirmDeleteBtn.dataset.plantId;
-                if (plantIdToDelete) {
-                    handleDelete(plantIdToDelete);
-                    deleteModal.classList.add('hidden');
-                }
-            });
-
-            closeErrorModalBtn.addEventListener('click', () => {
-                errorModal.classList.add('hidden');
-            });
-            
-            initApp();
-        });<iframe src="caminho/para/planta-app.html" width="100%" height="800px" style="border:none;"></iframe>
-    </script>
+        <a href="index.html" class="back-link">Voltar para a Página Inicial</a>
+    </div>
 </body>
 </html>
