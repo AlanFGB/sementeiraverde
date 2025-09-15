@@ -1,1 +1,72 @@
-Links e informações do programa de afiliados Hotmart.
+body class="flex items-center justify-center min-h-screen p-4">
+
+    <main class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden p-6 sm:p-8">
+
+        <!-- Seção de Cabeçalho -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-2">
+                O Produto Incrível Que Você Estava Procurando!
+            </h1>
+            <p class="text-gray-600 text-base sm:text-lg">
+                Descubra como [Nome do Produto] pode transformar sua vida.
+            </p>
+        </header>
+
+        <!-- Seção de Imagem e Conteúdo -->
+        <div class="flex flex-col items-center mb-8">
+            <!-- Use um placeholder de imagem. Substitua esta URL pela imagem do seu produto. -->
+            <img src="https://placehold.co/600x400/2563eb/ffffff?text=Imagem+do+Produto" 
+                 alt="Imagem de demonstração do produto" 
+                 class="w-full rounded-xl shadow-lg mb-6">
+            
+            <p class="text-gray-700 text-sm sm:text-base leading-relaxed text-center mb-6">
+                Aqui você pode adicionar uma descrição detalhada e atraente do produto.
+                Fale sobre os benefícios, os problemas que ele resolve e por que ele é a
+                melhor escolha para o seu público. Seja persuasivo e use uma linguagem
+                direta. Substitua este texto pelo conteúdo do seu produto.
+            </p>
+
+            <ul class="text-gray-600 text-left w-full space-y-2 mb-8">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Benefício 1: Descrição do primeiro grande benefício.</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Benefício 2: Descrição do segundo benefício chave.</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Benefício 3: Explicação de uma característica única.</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Seção de Botão de Ação -->
+        <div class="text-center">
+            <button id="cta-button" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-full shadow-lg transition-transform transform hover:scale-105">
+                Compre Agora e Ganhe um Desconto!
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        // Use JavaScript para tratar o clique no botão
+        document.getElementById('cta-button').addEventListener('click', () => {
+            // Substitua esta URL pelo seu link de afiliado real.
+            const affiliateLink = "https://seulink.com/para-o-produto";
+            
+            // Redireciona o usuário para o link de afiliado
+            window.location.href = affiliateLink;
+        });
+    </script>
+
+</body>
+</html>
