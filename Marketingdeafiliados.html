@@ -1,26 +1,49 @@
-body class="flex items-center justify-center min-h-screen p-4">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link de Afiliado</title>
+    <!-- Tailwind CSS CDN para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <main class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden p-6 sm:p-8">
+    <main class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 sm:p-8 text-center">
 
-        <!-- Seção de Cabeçalho -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-2">
-                O Produto Incrível Que Você Estava Procurando!
+        <!-- Seção de Título do Produto -->
+        <header class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-2" id="product-name">
+                [Nome do Produto]
             </h1>
-             <hr>
+        </header>
 
-        <h2>Marketing De Afiliados</h2>
-        <section class="content-section-styled">
-            <p>Conheça o Marketing de Afiliados</p>
-            <p> <a href="Marketingdeafiliados">Marketing de Afiliados</a></p>
-        </section>
- <hr>
+        <!-- Seção de Botão de Ação -->
+        <div class="text-center">
+            <button id="cta-button" class="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-full shadow-lg transition-transform transform hover:scale-105">
+                Acessar Agora
+            </button>
+        </div>
 
-       
-        </section>
     </main>
-</body>
-</html>
+
+    <script>
+        // --- INFORMAÇÕES QUE VOCÊ PRECISA EDITAR ---
+        const productName = "[Nome do Produto]";
+        const affiliateLink = "https://seulink.com/para-o-produto"; 
+        // ------------------------------------------
+
+        document.getElementById('product-name').textContent = productName;
+        document.getElementById('cta-button').addEventListener('click', () => {
+            window.location.href = affiliateLink;
+        });
     </script>
 
 </body>
