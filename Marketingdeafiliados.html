@@ -1,51 +1,93 @@
-ok<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link de Afiliado</title>
-    <!-- Tailwind CSS CDN para estilização -->
+    <title>Sementeira Verde - Nossos Assuntos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+
+            /* ESTILOS PARA IMAGEM DE FUNDO (pode ser a mesma ou diferente) */
+            background-image: url('Imagens/cogu.png'); /* Certifique-se de que este caminho está correto no seu repositório */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+
+            color: #ffffff;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Um pouco mais opaco */
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            max-width: 90%;
+            width: 700px; /* Largura um pouco maior para a página de conteúdo */
+            color: #2f4f4f;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #006400;
+            font-size: 2.5rem; /* Título maior */
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        h3 { /* Estilo para subtítulos de artigos */
+            color: #2e8b57;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            text-align: left;
+        }
+        p {
+            color: #4a5568;
+            font-size: 1.125rem;
+            line-height: 1.6; /* Espaçamento entre linhas */
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #32cd32; /* Verde limão */
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .back-link:hover {
+            background-color: #228b22; /* Verde floresta escuro */
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #cbd5e0;
+            margin: 2rem 0;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body>
+    <div class="container">
+        <h1>Marketing de afiliados Hotmart (confira os produtos que estou oferecendo, e se tiver algum produto em especial, é só me chamar que estarei localizando ele e oferecendo todas as possibilidades)</h1>
+        <p> <a href="https://wa.me/5549998107919?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20a%20Sementeira%20Verde.">WhatsApp</a>.</p> <a href="https://devoltaasraizes.com.br/">De Volta As Raízes</a></p>
 
-    <main class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 sm:p-8 text-center">
+        <hr>
 
-        <!-- Cartões de visita frente e verso editáveis no Corel Draw
-  -->
-        <header class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-2" id="product-name">
-                [Nome do Produto]
-            </h1>
-        </header>
 
-        <!-- https://go.hotmart.com/V100212494V -->
-        <div class="text-center">
-            <button id="cta-button" class="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-full shadow-lg transition-transform transform hover:scale-105">
-                Acessar Agora
-            </button>
-        </div>
-
-    </main>
-
-    <script>
-        // --- INFORMAÇÕES QUE VOCÊ PRECISA EDITAR ---
-        const productName = "[Nome do Produto]";
-        const affiliateLink = "https://seulink.com/para-o-produto"; 
-        // ------------------------------------------
-
-        document.getElementById('product-name').textContent = productName;
-        document.getElementById('cta-button').addEventListener('click', () => {
-            window.location.href = affiliateLink;
-        });
-    </script>
-
+        <a href="index.html" class="back-link">Voltar para a Página Inicial</a>
+    </div>
 </body>
 </html>
