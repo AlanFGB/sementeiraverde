@@ -5,14 +5,17 @@ import {
   collection, 
   addDoc, 
   onSnapshot, 
-  query, 
-  orderBy, 
   serverTimestamp 
 } from 'firebase/firestore';
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
-import { MessageSquare, Send, User, Clock, AlertCircle } from 'lucide-react';
+import { 
+  getAuth, 
+  signInAnonymously, 
+  onAuthStateChanged, 
+  signInWithCustomToken 
+} from 'firebase/auth';
+import { MessageSquare, Send, Clock, AlertCircle } from 'lucide-react';
 
-// Configurações globais do ambiente
+// Configurações globais do ambiente (injetadas pelo sistema)
 const firebaseConfig = JSON.parse(__firebase_config);
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -27,7 +30,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. Autenticação (Regra 3)
+  // 1. Ciclo de Autenticação (Seguindo a Regra 3)
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -38,27 +41,27 @@ export default function App() {
         }
       } catch (err) {
         console.error("Erro na autenticação:", err);
-        setError("Erro ao ligar ao servidor de identidade.");
+        setError("Erro ao conectar ao serviço de identidade.");
       }
     };
 
     initAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  // 2. Escuta de Comentários (Regra 1 e 2)
+  // 2. Escuta de Dados em Tempo Real (Seguindo Regras 1 e 2)
   useEffect(() => {
+    // Proteção: Só executa se o usuário estiver autenticado (Regra 3)
     if (!user) return;
 
-    // Caminho estrito conforme Regra 1: /artifacts/{appId}/public/data/{collection}
+    // Caminho estrito conforme Regra 1
     const commentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'comments');
     
-    // Nota: Filtramos/ordenamos na memória se houver problemas de index, 
-    // mas aqui usamos uma query simples de coleção.
+    // Escuta simples sem orderBy complexo para evitar erro de índice (Regra 2)
     const unsubscribe = onSnapshot(
       commentsRef,
       (snapshot) => {
@@ -67,7 +70,7 @@ export default function App() {
           ...doc.data()
         }));
         
-        // Ordenação manual em memória para evitar necessidade de índices compostos (Regra 2)
+        // Ordenação manual em memória para máxima compatibilidade
         const sortedDocs = docs.sort((a, b) => {
           const timeA = a.createdAt?.seconds || 0;
           const timeB = b.createdAt?.seconds || 0;
@@ -78,7 +81,7 @@ export default function App() {
       },
       (err) => {
         console.error("Erro no Firestore:", err);
-        setError("Não foi possível carregar os comentários.");
+        setError("Permissão negada ou erro de conexão com o banco de dados.");
       }
     );
 
@@ -94,15 +97,16 @@ export default function App() {
       authorName: userName.trim() || 'Utilizador Anónimo',
       userId: user.uid,
       createdAt: serverTimestamp(),
-      avatarSeed: Math.floor(Math.random() * 1000)
     };
 
     try {
       const commentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'comments');
       await addDoc(commentsRef, commentData);
       setNewComment('');
+      setError(null);
     } catch (err) {
-      setError("Erro ao enviar comentário.");
+      console.error("Erro ao enviar:", err);
+      setError("Não foi possível publicar seu comentário.");
     }
   };
 
@@ -115,7 +119,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center space-x-3 mb-8">
@@ -124,29 +128,29 @@ export default function App() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Mural de Comentários</h1>
-            <p className="text-gray-500 text-sm">Partilhe a sua opinião com a comunidade</p>
+            <p className="text-gray-500 text-sm">Comunidade e Feedback</p>
           </div>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-center space-x-2">
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-center space-x-2 rounded">
             <AlertCircle size={20} />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Form Case */}
+        {/* Form */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">O seu nome (opcional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Seu Nome</label>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="Ex: Maria Silva"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                placeholder="Ex: Visitante"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
               />
             </div>
             <div>
@@ -155,65 +159,52 @@ export default function App() {
                 required
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Escreva aqui o seu comentário..."
+                placeholder="Escreva algo..."
                 rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
             <button
               type="submit"
               disabled={!newComment.trim()}
-              className="flex items-center justify-center space-x-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center space-x-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
             >
               <Send size={18} />
-              <span>Publicar Comentário</span>
+              <span>Publicar</span>
             </button>
           </form>
         </div>
 
-        {/* Comments List */}
+        {/* List */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center space-x-2">
-            <span>Comentários</span>
-            <span className="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">
-              {comments.length}
-            </span>
+          <h2 className="text-lg font-semibold text-gray-800">
+            Mensagens ({comments.length})
           </h2>
 
           {comments.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500">
-              Ainda não existem comentários. Seja o primeiro a comentar!
+            <div className="text-center py-10 bg-white rounded-xl border border-dashed border-gray-300 text-gray-400">
+              Nenhum comentário ainda.
             </div>
           ) : (
             comments.map((comment) => (
               <div 
                 key={comment.id} 
-                className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm transition-all hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-300"
+                className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-bold bg-gradient-to-br from-blue-400 to-indigo-600`}>
-                      {comment.authorName.charAt(0).toUpperCase()}
-                    </div>
+                  <div className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold bg-blue-500">
+                    {comment.authorName.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-sm font-bold text-gray-900 truncate">
-                        {comment.authorName}
-                      </h3>
-                      <div className="flex items-center text-xs text-gray-400 space-x-1">
-                        <Clock size={12} />
-                        <span>
-                          {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString('pt-PT') : 'Recentemente'}
-                        </span>
+                      <span className="font-bold text-gray-900">{comment.authorName}</span>
+                      <div className="flex items-center text-xs text-gray-400">
+                        <Clock size={12} className="mr-1" />
+                        {comment.createdAt ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString() : 'Agora'}
                       </div>
                     </div>
-                    <p className="text-gray-700 text-sm leading-relaxed break-words">
-                      {comment.text}
-                    </p>
-                    <div className="mt-2 text-xs text-gray-400 font-mono italic">
-                      ID: {comment.userId.substring(0, 8)}...
-                    </div>
+                    <p className="text-gray-700 text-sm">{comment.text}</p>
+                    <p className="mt-2 text-[10px] text-gray-300 font-mono">ID: {comment.userId}</p>
                   </div>
                 </div>
               </div>
