@@ -6,245 +6,209 @@
     <title>Sementeira Verde</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Define a fonte Inter para todo o corpo do documento */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
         body {
             font-family: 'Inter', sans-serif;
-            /* Garante que o corpo ocupe toda a altura da viewport */
             min-height: 100vh;
             margin: 0;
-            /* Imagem de fundo em tela cheia com uma sobreposição escura para melhor legibilidade do texto */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('Imagens/Gemini_Generated_Image_sfi8nbsfi8nbsfi8.png');
-            background-size: cover; /* Cobre toda a área */
-            background-repeat: no-repeat; /* Evita repetição */
-            background-position: center center; /* Centraliza a imagem */
-            background-attachment: fixed; /* Mantém a imagem fixa ao rolar */
-            color: #e0ffe0; /* Cor de texto padrão clara (verde muito claro) para o corpo */
+            /* Gradiente de sobreposição para garantir leitura sobre a imagem de fundo */
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1523301343968-6a6ebf63c672?q=80&w=2069&auto=format&fit=crop');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            color: #e0ffe0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Alinha o conteúdo ao topo */
-            padding-bottom: 2rem; /* Adiciona um pouco de padding na parte inferior */
         }
 
-        /* Estilos para o logo */
-        .logo {
-            max-width: 180px; /* Aumentado ligeiramente para mais destaque */
-            height: auto;
-            margin-top: 2rem; /* Espaçamento superior */
-            margin-bottom: 1.5rem;
-            border-radius: 0.75rem; /* Cantos mais arredondados */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra para destaque */
-        }
-
-        /* Estilos para títulos H1 */
-        h1 {
-            color: #98fb98; /* Verde claro vibrante para o H1 */
-            font-size: clamp(2.5rem, 6vw, 4rem); /* Tamanho responsivo para H1 */
-            font-weight: 800; /* Mais negrito */
-            margin-bottom: 1rem;
-            text-align: center;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); /* Sombra para legibilidade */
-        }
-
-        /* Estilos para títulos H2 */
-        h2 {
-            color: #b0e0e6; /* Azul esverdeado claro para o H2 (combina com o tema natural) */
-            font-size: clamp(1.8rem, 4vw, 2.5rem); /* Tamanho responsivo para H2 */
-            font-weight: 700;
-            margin-top: 2.5rem; /* Mais espaçamento superior */
-            margin-bottom: 1rem;
-            text-align: center;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); /* Sombra para legibilidade */
-        }
-
-        /* Estilos para parágrafos */
-        p {
-            color: #f0fff0; /* Branco-esverdeado para parágrafos */
-            font-size: clamp(1rem, 2.5vw, 1.125rem); /* Tamanho responsivo */
-            line-height: 1.7; /* Altura da linha para melhor leitura */
-            margin-bottom: 1rem;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Sombra sutil */
-            text-align: center;
-            max-width: 800px; /* Limita a largura do parágrafo para melhor leitura */
-            padding: 0 1rem; /* Adiciona padding lateral */
-        }
-
-        /* Estilos para as seções de conteúdo (substituindo .content-section) */
-        .content-section-styled {
-            background-color: rgba(255, 255, 255, 0.15); /* Fundo semi-transparente para as seções */
-            border-radius: 1rem; /* Cantos mais arredondados */
-            padding: 2rem; /* Aumenta o padding */
-            margin-top: 2rem;
-            text-align: left;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada */
-            width: 90%; /* Largura fluida */
-            max-width: 900px; /* Limite máximo para desktop */
-            backdrop-filter: blur(5px); /* Efeito de desfoque no fundo */
-            -webkit-backdrop-filter: blur(5px); /* Compatibilidade Safari */
-            border: 1px solid rgba(255, 255, 255, 0.2); /* Borda sutil */
-        }
-
-        /* Cores de texto dentro das seções estilizadas */
-        .content-section-styled p, 
-        .content-section-styled ul, 
-        .content-section-styled ol,
-        .content-section-styled a {
-            color: #f0fff0; /* Texto claro dentro das seções */
-            font-size: clamp(0.95rem, 2.2vw, 1.05rem); /* Tamanho responsivo */
-            line-height: 1.6;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6); /* Sombra para legibilidade */
-        }
-
-        /* Estilos para listas dentro das seções */
-        .content-section-styled ul, 
-        .content-section-styled ol {
-            padding-left: 25px; /* Mais padding para listas */
-        }
-
-        /* Estilos para links */
-        a {
-            color: #66ff66; /* Verde limão vibrante para links */
-            text-decoration: none;
-            font-weight: 600; /* Mais negrito */
-            transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out; /* Transição suave */
-        }
-
-        a:hover {
-            text-decoration: underline;
-            color: #32cd32; /* Verde floresta escuro ao passar o mouse */
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8); /* Sombra mais intensa ao passar o mouse */
-        }
-
-        /* Estilos para a linha divisória */
-        hr {
-            border: 0;
-            height: 1px;
-            background-color: rgba(255, 255, 255, 0.3); /* Linha mais sutil e translúcida */
-            margin: 3rem 0; /* Mais espaçamento */
-            width: 70%; /* Largura da linha */
-            max-width: 600px;
-        }
-
-        /* Centraliza o conteúdo principal */
         main {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%; /* Ocupa toda a largura disponível */
-            padding: 0 1rem; /* Adiciona padding lateral para evitar que o conteúdo toque as bordas */
+            width: 100%;
+            padding: 2rem 1rem;
+            max-width: 1000px;
         }
 
-        /* Media queries para responsividade em telas menores */
-        @media (max-width: 768px) {
-            .logo {
-                max-width: 120px;
-            }
-            h1 {
-                font-size: clamp(2rem, 8vw, 3rem);
-            }
-            h2 {
-                font-size: clamp(1.5rem, 6vw, 2rem);
-            }
-            p {
-                font-size: clamp(0.9rem, 3vw, 1rem);
-            }
-            .content-section-styled {
-                padding: 1.5rem;
-                width: 95%; /* Ocupa mais largura em telas menores */
-            }
-            .content-section-styled p, 
-            .content-section-styled ul, 
-            .content-section-styled ol,
-            .content-section-styled a {
-                font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-            }
+        h1 {
+            color: #98fb98;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        h2 {
+            color: #b0e0e6;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        p {
+            color: #f0fff0;
+            font-size: clamp(1rem, 2.5vw, 1.125rem);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-section-styled {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 100%;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .content-section-styled ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .content-section-styled li {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .content-section-styled li::before {
+            content: "•";
+            color: #66ff66;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        a {
+            color: #66ff66;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: #32cd32;
+            text-shadow: 0 0 8px rgba(102, 255, 102, 0.5);
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+            width: 80%;
+            margin: 2rem 0;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            background: #25d366;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            margin-top: 1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .contact-btn:hover {
+            background: #128c7e;
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <!-- O elemento main agora envolve todo o conteúdo principal para semântica e layout -->
+
     <main>
-        
         <h1>Sementeira Verde</h1>
-        <p>Bem-vindo ao seu site! Aqui você encontrará informações sobre a Sementeira Verde, um espaço dedicado ao desenvolvimento, revendas, consultas e muito mais.</p>
-        <p>Explore nossos produtos e iniciativas!</p>
+        <p>Conectando você ao desenvolvimento sustentável, revendas exclusivas e consultas especializadas.</p>
+        
+        <section class="content-section-styled">
+            <p>Bem-vindo ao seu espaço dedicado à natureza e bem-estar. Explore nossas iniciativas e produtos selecionados para um estilo de vida mais natural.</p>
+        </section>
 
         <hr>
 
         <h2>Nossa Missão</h2>
-        <!-- Usando uma classe para estilização de seção semântica, sem div.container -->
         <section class="content-section-styled">
-            <p>Na Sementeira Verde, nossa missão é conectar pessoas à natureza, promovendo o cultivo sustentável e a educação ambiental. Acreditamos que um futuro mais verde começa com pequenas sementes plantadas hoje.</p>
-      <a href="Insumosparacultivo">Insumos para cultivar sua horta</a>
+            <p>Conectar pessoas à natureza, promovendo o cultivo sustentável e a educação ambiental. Acreditamos que um futuro mais verde começa com pequenas sementes plantadas hoje.</p>
+            <div class="text-center mt-4">
+                <a href="Insumosparacultivo.html" class="text-lg">Explore nossos Insumos para cultivo →</a>
+            </div>
         </section>
 
-        <hr>     
-        
-        <h2>Nossos Produtos e Parcerias</h2>
+        <hr>
+
+        <h2>Produtos e Parcerias</h2>
         <section class="content-section-styled">
             <ul>
                 <li>Revenda Sementeira Verde Stays.</li>
-                <li>As maiores e melhores linhas de fitoterápicos 100% naturais.</li>
-                <li>Atualmente sou Representante Comercial do <a href="HortadaTerra.html">Horta da Terra</a>; revendedor <a href="Vilmed.html">Vilmed</a> (com produtos para mais de 200 patologias); De Volta As Raízes (cogumelos fitoterápicos em pó, capsulas e líquido <a href="DeVoltaAsRaizes.html">De Volta As Raízes</a> e parceiro de <a href="VéioPimenta.html">Véio Pimenta</a> (todos produtos 100% naturais).</li>
-                <li>Temos promoções especiais da cachaça <a href="https://www.matuta.com.br/" target="_blank">Matuta</a> em Santa Catarina. Para promoções, catálogos e formas de usar, é só chamar pelo WhatsApp. Gratidão Família.</li>
+                <li>Linhas de fitoterápicos 100% naturais.</li>
+                <li>Representante Comercial: <a href="HortadaTerra.html">Horta da Terra</a>.</li>
+                <li>Revendedor <a href="Vilmed.html">Vilmed</a> (mais de 200 patologias atendidas).</li>
+                <li><a href="DeVoltaAsRaizes.html">De Volta As Raízes</a>: Cogumelos fitoterápicos (pó, cápsulas e líquido).</li>
+                <li>Parceria <a href="VéioPimenta.html">Véio Pimenta</a>: Produtos 100% naturais.</li>
+                <li>Cachaça <a href="https://www.matuta.com.br/" target="_blank">Matuta</a>: Promoções especiais em Santa Catarina. Solicite o catálogo via WhatsApp.</li>
             </ul>
         </section>
-     
+
         <hr>
-      
+
         <h2>Conecta Digital</h2>
         <section class="content-section-styled">
             <ul>
-                <li>Trabalhamos junto com grandes marcas brasileiras</li>
-                <li>Revo Energia: Instalação de painéis solares totalmente gratuita. Na Revo Energia temos o sócio Rodrigo Santoro e com ela você ganha os painéis solares depois do fim do contrato que vária conforme o interesse do cliente. Para receber os painéis solares você precisa de um telhado ou laje para a instalação, a casa pode ser própria ou alugada. E se o cliente gastar acima de 400R$ mensais de energia, ele já recebe desconto na fatura de energia.</li>
-                <li>Igreen: Fornece desconto em faturas de energia acima de 150 R$ mensais e em várias outras marcas que trabalham junto com a Igreen<li>
-                <li>CVC: Viagens em 12 vezes sem juros, com estádia e ou passagens (verifique a disponibilidade para sua cidade). <a href="https://www.cvc.com.br" target="_blank">CVC</a> <li>
-                <li>Empréstimos: Saques FGTS, Bolsa Família, Consignado, com Casa ou Carro de garantia. <li>
-                <li>Planos 5g e muito mais, venha fazer sua consulta totalmente gratuíta<li>
-                 </ul>
+                <li><strong>Revo Energia:</strong> Instalação gratuita de painéis solares. Ganhe os painéis após o contrato. Ideal para gastos acima de R$ 400,00/mês.</li>
+                <li><strong>Igreen:</strong> Descontos em faturas acima de R$ 150,00 e benefícios em marcas parceiras.</li>
+                <li><strong>CVC:</strong> Viagens parceladas em 12x sem juros. <a href="https://www.cvc.com.br" target="_blank">Consultar Disponibilidade</a>.</li>
+                <li><strong>Empréstimos:</strong> Saques FGTS, Bolsa Família, Consignado e Garantia de Imóvel/Veículo.</li>
+                <li><strong>Serviços 5G:</strong> Planos e consultas gratuitas.</li>
+            </ul>
         </section>
-        
-        <hr>
-        
-        <h2>Influenciador Digital Magalu</h2>
-        <section class="content-section-styled">
-            <p>Este é o meu site como Influenciador Magalu, onde você pode encontrar uma seleção especial de produtos.</p>
-            <p><a href="https://www.magazinevoce.com.br/magazinesementeiraverde/" target="_blank">Visite a Sementeira Verde no Magazine Luiza</a></p>
-        </section>
-       
+
         <hr>
 
-        <h2></h2>
-        <section class="content-section-styled">
-            <p>Storybooks.<a href="MeusLivrosdeHistórias.html"> Desenvolva idéias e livros comigo.Se tiver uma idéia é só me chamar pelo whats app. Tenha uma boa leitura!</p>
+        <h2>Influenciador Magalu</h2>
+        <section class="content-section-styled text-center">
+            <p>Visite minha loja oficial como Influenciador Magalu e confira ofertas exclusivas selecionadas por mim.</p>
+            <a href="https://www.magazinevoce.com.br/magazinesementeiraverde/" target="_blank" class="text-xl">Loja Magazine Sementeira Verde</a>
         </section>
-        
+
         <hr>
-        
+
+        <h2>Storybooks</h2>
+        <section class="content-section-styled text-center">
+            <p>Tem uma ideia para um livro? Desenvolva seus projetos literários comigo.</p>
+            <a href="MeusLivrosdeHistórias.html">Ver Meus Livros de Histórias →</a>
+        </section>
+
+        <hr>
+
         <h2>Entre em Contato</h2>
-        
-        <section class="content-section-styled">
-    <p>
-        Tem alguma pergunta ou quer saber mais? 
-        <a href="mailto:alanfgb2020@gmail.com">Envie-nos um e-mail</a> 
-        ou 
-        <a href="https://wa.me/5549998107919?text=Olá%2C%20gostaria%20de%20saber%20mais%20sobre%20a%20Sementeira%20Verde.">fale conosco pelo WhatsApp</a>.
-    </p>
-    <p>Até breve!</p>
-</section>
+        <section class="content-section-styled text-center">
+            <p>Dúvidas ou consultas? Estamos à disposição.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="mailto:alanfgb2020@gmail.com" class="hover:underline">alanfgb2020@gmail.com</a>
+                <a href="https://wa.me/5549998107919?text=Olá%2C%20gostaria%20de%20saber%20mais%20sobre%20a%20Sementeira%20Verde." class="contact-btn">
+                    Falar no WhatsApp
+                </a>
+            </div>
+            <p class="mt-6 text-sm italic">Gratidão Família. Até breve!</p>
         </section>
-
-        <hr>
-        
- <h2></h2>
-        
-        
-            
-        </section>    
- <hr>
-   </ul>
-        </section>
-     </section>
     </main>
+
 </body>
 </html>
